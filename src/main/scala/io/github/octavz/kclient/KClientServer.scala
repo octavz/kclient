@@ -13,6 +13,7 @@ object KClientServer extends StreamApp[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]) = {
     ServerStream.stream
   }
+
 }
 
 object ServerStream {
