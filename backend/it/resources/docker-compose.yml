@@ -1,0 +1,45 @@
+# Note that you might have to increase the memory footprint of the docker-machine in order to run these containers
+# docker-machine stop
+# VBoxManage modifyvm default --cpus 2
+# VBoxManage modifyvm default --memory 4096
+# docker-machine start
+version: '2'
+services:
+  zookeeper:
+    network_mode: "host"
+    image: confluentinc/cp-zookeeper:3.3.0
+    hostname: zookeeper
+    ports:
+      - "${ZOO_PORT}:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOO_PORT}
+  broker1:
+    network_mode: "host"
+    image: confluentinc/cp-kafka:3.3.0
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=localhost:${ZOO_PORT}
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:${BROKER_PORT_1}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_BROKER_ID=1
+    depends_on:
+      - zookeeper
+  broker2:
+    network_mode: "host"
+    image: confluentinc/cp-kafka:3.3.0
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=localhost:${ZOO_PORT}
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:${BROKER_PORT_2}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_BROKER_ID=2
+    depends_on:
+      - zookeeper
+  broker3:
+    network_mode: "host"
+    image: confluentinc/cp-kafka:3.3.0
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=localhost:${ZOO_PORT}
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:${BROKER_PORT_3}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_BROKER_ID=3
+    depends_on:
+      - zookeeper

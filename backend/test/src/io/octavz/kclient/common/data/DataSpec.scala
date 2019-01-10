@@ -1,4 +1,4 @@
-package io.octavz.kclient.data
+package io.octavz.kclient.common.data
 
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers

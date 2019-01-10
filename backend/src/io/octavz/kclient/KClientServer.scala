@@ -7,7 +7,7 @@ import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
-import io.octavz.kclient.data._
+import io.octavz.kclient.common.data._
 
 object HelloWorldServer extends IOApp {
   def run(args: List[String]): IO[ExitCode] = AppEnv().flatMap { env =>

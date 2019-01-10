@@ -2,7 +2,7 @@ package io.octavz
 
 import cats.data.ReaderT
 import cats.effect._
-import io.octavz.kclient.data._
+import io.octavz.kclient.common.data._
 
 package object kclient {
 

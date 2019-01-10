@@ -8,8 +8,8 @@ import org.http4s.dsl.Http4sDsl
 import cats.effect._
 import cats.mtl.implicits._
 
-import io.octavz.kclient.actions.KafkaOps
-import io.octavz.kclient.implicits._
+import io.octavz.kclient.kafka.KafkaOps
+import io.octavz.kclient.common.implicits._
 
 class AdminService[F[_]](implicit F: Effect[F], cs: ContextShift[F]) extends Http4sDsl[F] {
 
