@@ -1,0 +1,40 @@
+{
+  "name": "kclient",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "webpack -w",
+    "webpack:production": "NODE_ENV=production webpack",
+    "server": "webpack-dev-server"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "Octav",
+  "license": "MIT",
+  "devDependencies": {
+    "@material-ui/core": "^3.6.2",
+    "@material-ui/icons": "^3.0.1",
+    "@material-ui/styles": "3.0.0-alpha.3",
+    "bs-platform": "^4.0.14",
+    "bsb-js": "^1.1.7",
+    "html-webpack-plugin": "^3.2.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
+    "reason-react": ">=0.5.3",
+    "webpack": "^4.0.1",
+    "webpack-cli": "^3.1.1",
+    "webpack-dev-server": "^3.1.8"
+  },
+  "peerDependencies": {
+    "@material-ui/core": "^3.6.2",
+    "@material-ui/icons": "^3.0.1",
+    "@material-ui/styles": "^3.0.0-alpha.3"
+  },
+  "dependencies": {
+    "@jsiebern/bs-material-ui": "^1.0.0-beta.4"
+  }
+}
