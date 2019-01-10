@@ -9,7 +9,7 @@ import org.http4s.syntax.kleisli._
 
 import io.octavz.kclient.common.data._
 
-object HelloWorldServer extends IOApp {
+object KClientServer extends IOApp {
   def run(args: List[String]): IO[ExitCode] = AppEnv().flatMap { env =>
     ServerStream.stream(env).compile.drain.as(ExitCode.Success)
   }
