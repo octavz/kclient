@@ -40,8 +40,7 @@ trait BaseKafkaTest extends FlatSpec with Matchers with ForAllTestContainer {
     R.refineV[HostValidation](s"$host:$p").right.get
 
   implicit val testEnv: AppEnv = AppEnv(
-    KafkaConfig("test", Seq(host(p1), host(p2), host(p3))),
-    ZkConfig(Seq(host(pz))))
+    KafkaConfig("test", List(host(p1), host(p2), host(p3))), ZkConfig(List(host(pz))))
 
 
 }

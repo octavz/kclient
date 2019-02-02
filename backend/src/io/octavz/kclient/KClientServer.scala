@@ -2,33 +2,43 @@ package io.octavz.kclient
 
 import cats.effect._
 import cats.implicits._
+
+import cats.effect.concurrent.Ref
+
 import org.http4s.HttpApp
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
+import com.olegpy.meow.effects._
+import io.chrisdavenport.log4cats.Logger
+
+import io.octavz.kclient.kafka.KafkaOps
 import io.octavz.kclient.common.data._
+import io.octavz.kclient.common.implicits._
 
 object KClientServer extends IOApp {
-  def run(args: List[String]): IO[ExitCode] = AppEnv().flatMap { env =>
-    ServerStream.stream(env).compile.drain.as(ExitCode.Success)
+
+  def run(args: List[String]): IO[ExitCode] = AppEnv.empty().flatMap { env =>
+    Ref.unsafe[IO, AppEnv](env).runAsk { implicit askInst =>
+      ServerStream.stream[IO].compile.drain.as(ExitCode.Success)
+    }
   }
 }
 
 object ServerStream {
 
-  def httpApp[F[_]: Effect: ContextShift: Timer]: HttpApp[F] =
-    Router(
-      "/" -> AdminService[F].routes
-    ).orNotFound
+  def httpApp[F[_] : Effect : KafkaOps]: HttpApp[F] = {
+    val adminRoutes = AdminRoutes[F]
+    Router.define(
+      "/" -> adminRoutes.topicRoutes
+    )(adminRoutes.topicRoutes).orNotFound
+  }
 
-  def stream(appEnv: AppEnv): fs2.Stream[IO, ExitCode] = {
-    val ec = scala.concurrent.ExecutionContext.Implicits.global
-    implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-    implicit val timer: Timer[IO] = IO.timer(ec)
-    BlazeServerBuilder[IO]
+  def stream[F[_] : ConcurrentEffect : Timer : Logger : KafkaOps]: fs2.Stream[F, ExitCode] = {
+    BlazeServerBuilder[F]
       .bindHttp(8080, "0.0.0.0")
-      .withHttpApp(httpApp[IO])
+      .withHttpApp(httpApp[F])
       .serve
   }
 }

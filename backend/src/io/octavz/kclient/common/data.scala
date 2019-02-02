@@ -23,7 +23,7 @@ package object data {
   type Host = String Refined HostValidation
 
   case class ZkConfig(
-    hosts: Seq[Host],
+    hosts: List[Host],
     isSecure: Boolean = false,
     sessionTimeoutMs: Int = 1000,
     connectionTimeoutMs: Int = 1000,
@@ -33,7 +33,7 @@ package object data {
   }
 
   case class KafkaConfig(groupId: String,
-    brokers: Seq[Host],
+    brokers: List[Host],
     clientId: String = "consumerAdmin") {
 
     val asProperties: Properties = {
@@ -69,6 +69,12 @@ package object data {
 
     val DEFAULT_TIMEOUT = 10.seconds
     val DEFAULT_TIMEOUT_MS = DEFAULT_TIMEOUT.toMillis.toInt
+
+    def empty() : IO[AppEnv] = IO.pure(AppEnv(
+      kafkaConfig = KafkaConfig("kclient",List("localhost:9092")),
+      zkConfig = ZkConfig(List("localhost:2181"))))
+
+
 
     def apply(): IO[AppEnv] = for {
       confKafka <- pureconfig.loadConfig[KafkaConfig]("kclient.kafka") match {

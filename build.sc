@@ -9,7 +9,7 @@ val KafkaVersion = "2.1.0"
 val RefinedVersion = "0.9.3"
 
 object backend extends ScalaModule with ScalafmtModule {
-
+  override def forkArgs = Seq("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5555")
 
   override def repositories = super.repositories ++ Seq(
     MavenRepository("https://oss.sonatype.org/content/repositories/releases")
@@ -20,7 +20,7 @@ object backend extends ScalaModule with ScalafmtModule {
   override def scalacOptions = Seq(
     "-encoding",
     "utf8", // Option and arguments on same line
-    "-Xfatal-warnings",
+    //    "-Xfatal-warnings",
     "-Ypartial-unification",
     "-deprecation",
     "-unchecked",
@@ -29,8 +29,25 @@ object backend extends ScalaModule with ScalafmtModule {
     "-language:higherKinds",
     "-language:existentials",
     "-language:postfixOps",
+    //    "-Xlog-implicits",
     "-Xplugin:clippy-plugin_2.12-0.5.3-bundle.jar"
   )
+
+  def runDebug(port: Int, args: String*) = T.command {
+    import mill.modules.Jvm
+    import mill.eval.Result
+    try Result.Success(Jvm.runSubprocess(
+      finalMainClass(),
+      runClasspath().map(_.path),
+      Seq(s"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=$port"),
+      forkEnv(),
+      args,
+      workingDir = forkWorkingDir()
+    )) catch {
+      case e: Exception =>
+        Result.Failure("subprocess failed")
+    }
+  }
 
   override def compileIvyDeps: Target[Loose.Agg[Dep]] = Agg(
     ivy"com.lihaoyi::mill-scalalib:0.3.5"

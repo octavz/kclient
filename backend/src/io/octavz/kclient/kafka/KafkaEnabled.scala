@@ -20,7 +20,7 @@ trait KafkaEnabled[F[_]] {
 }
 
 object KafkaEnabled {
-  implicit def instF[F[_] : Sync : Logger](implicit AA: ApplicativeAsk[F, AppEnv]): KafkaEnabled[F] = new KafkaEnabled[F] {
+  implicit def instF[F[_] : Sync : Logger : LiftIO](implicit AA: ApplicativeAsk[F, AppEnv]): KafkaEnabled[F] = new KafkaEnabled[F] {
 
     override def withKafka[A](call: AdminClient => F[A]): F[A] = for {
       env <- AA.ask
@@ -29,7 +29,7 @@ object KafkaEnabled {
     } yield res
 
     override def withKafkaIO[A](call: AdminClient => IO[A]): F[A] =
-      withKafka(call andThen liftIO)
+      withKafka(call andThen LiftIO[F].liftIO)
 
     override def withZk[A](call: KafkaZkClient => F[A]): F[A] = for {
       env <- AA.ask

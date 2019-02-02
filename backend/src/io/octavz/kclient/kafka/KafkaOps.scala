@@ -31,34 +31,34 @@ object KafkaOps {
 
     val K = KafkaEnabled[F]
 
-    override def createTopic(topic: Topic): F[Topic] = K.withKafkaIO { c =>
+    override def createTopic(topic: Topic): F[Topic] = K.withKafkaIO {
       val newTopic = topic.replication match {
         case ByPartitions(num, factor) => new NewTopic(topic.name, num, factor)
         case ByAssignment(data)        => new NewTopic(topic.name, data.map { case (k, v) => (k, v.asJava) }.asJava)
       }
-      c.createTopics(Seq(newTopic).asJava).all().toIO().map(_ => topic)
+      _.createTopics(Seq(newTopic).asJava).all().toIO().map(_ => topic)
     }
 
-    override def topics(): F[Set[TopicName]] = K.withKafkaIO { c =>
+    override def topics(): F[Set[TopicName]] = K.withKafkaIO {
       val options = new ListTopicsOptions()
         .listInternal(true)
         .timeoutMs(AppEnv.DEFAULT_TIMEOUT_MS)
-      c.listTopics(options).names().toIO().map(_.asScala.toSet)
+      _.listTopics(options).names().toIO().map(_.asScala.toSet)
     }
 
-    override def consumerGroups(): F[List[ConsumerGroupSimple]] = K.withKafkaIO { client =>
+    override def consumerGroups(): F[List[ConsumerGroupSimple]] = K.withKafkaIO {
       val options = new ListConsumerGroupsOptions()
         .timeoutMs(AppEnv.DEFAULT_TIMEOUT_MS)
-      client.listConsumerGroups(options).all().toIO()
+      _.listConsumerGroups(options).all().toIO()
         .map(_.asScala.map(ConsumerGroupSimple.apply).toList)
     }
 
-    override def configBrokers(): F[Map[String, String]] = K.withKafkaIO { client =>
+    override def configBrokers(): F[Map[String, String]] = K.withKafkaIO {
       val options = new DescribeConfigsOptions()
         .timeoutMs(AppEnv.DEFAULT_TIMEOUT_MS)
         .includeSynonyms(true)
       val confResource = new ConfigResource(ConfigResource.Type.BROKER, "0")
-      client.describeConfigs(Seq(confResource).asJava, options)
+      _.describeConfigs(Seq(confResource).asJava, options)
         .all().toIO()
         .map(_.values().asScala.headOption)
         .map {
@@ -67,8 +67,8 @@ object KafkaOps {
         }
     }
 
-    override def partitionsFor(topic: String): F[List[Partition]] = K.withKafka { c =>
-      c.describeTopics(List(topic).asJava).values().asScala.headOption match {
+    override def partitionsFor(topic: String): F[List[Partition]] = K.withKafka {
+      _.describeTopics(List(topic).asJava).values().asScala.headOption match {
         case Some((_, v)) =>
           LiftIO[F].liftIO(v.toIO().map(_.partitions().asScala.map(Partition.apply).toList))
         case _            =>
